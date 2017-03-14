@@ -70,4 +70,19 @@ class EulerMethod:
 
         return t, y
 
-    
+    def explicit2(self, y1_start):
+        self.y1_start = y1_start
+
+        y = np.zeros(self.N)
+        y1 = np.zeros(self.N)
+        t = np.zeros(self.N)
+
+        t[0] = self.t0
+        y1[0] = self.y1_start
+        y[0] = self.y0
+        for k in range(1, self.N):
+            t[k] = self.t0 + k * self.h
+            y1[k] = y1[k - 1] + self.h * self.f(t[k - 1], y[k - 1], y1[k - 1])
+            y[k] = y[k - 1] + self.h * y1[k]
+
+        return t, y

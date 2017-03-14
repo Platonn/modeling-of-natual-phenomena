@@ -9,12 +9,14 @@ connectedSprings = ConnectedSprings(np.array([
     # numeracja sprezyn bedzie potem od 1 do N
     [None, None, None],
     [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
     [1, 1, None]  # ostatnia sprezyna istnieje(!) - ma swoje k i L
 ]))
 
 # zagadnienie poczatkowe:
-x_start = np.array([0, 1.5, 2])
-xPrim_start = np.array([0, 0, 0])
+x_start = np.array([0, 1, 2, 3, 4])
+xPrim_start = np.array([0, 0.5, 0, -0.5, 0])
 t_start = 0
 
 t_end = 20

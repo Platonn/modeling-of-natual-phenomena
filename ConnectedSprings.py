@@ -22,13 +22,8 @@ class ConnectedSprings:
             else:
 
                 return (
-                           # spike-old:
-                           # -self.k[j] * (xj - xj_prev - self.L[j]) + #SPIKE!!!!!!!!!!! NASTEPNA SPREZYNA TERAZ NIE MA WPLYWU
-                           # self.k[j + 1] * (xj_next - xj - self.L[j + 1]) #SPIKE!!!!!!!!!!! NASTEPNA SPREZYNA TERAZ NIE MA WPLYWU
-
-                           # spike-new:
-                           -self.k[j] * (xj - self.L[j])  # SPIKE!!!!!!!!!!! NASTEPNA SPREZYNA TERAZ NIE MA WPLYWU
-
+                           -self.k[j] * (xj - xj_prev - self.L[j]) +
+                           self.k[j + 1] * (xj_next - xj - self.L[j + 1])
                        ) / self.m[j]
 
         return resultFun
@@ -55,22 +50,16 @@ class ConnectedSprings:
         xPrim[:, 0] = xPrim[:, self.N - 1] = 0
 
         for k in range(1, stepsNum):  # from 1, because 0 is t_start - handled above
-            for j in range(1, self.N - 1): #spike-old
-            # for j in range(0, self.N):  # spike-new
+            for j in range(1, self.N - 1):
                 print('j', j) #spike
                 t[k] = t_start + k * h
 
-                # spike-new:
-                # if j == 0 or j == self.N - 1:
                 xj = x[k - 1][j]
                 xj_prev = x[k - 1][j - 1]
                 xj_next = x[k - 1][j + 1]
-                # else:
-                #     xj = x[k - 1][j]
-                #     xj_prev = xj_next = None  # spike
 
-                xPrim[k][j] = xPrim[k - 1][j] + h * f(j, xj, xj_prev, # spike-old: xBis[k - 1][j] + h *
-                                                    xj_next)  # xBis zalezy tylko od pozycji 3 ciezarkow w poprzednim kroku: biezacego i 2 sasiadujacych
+                xBis[k][j] = f(j, xj, xj_prev, xj_next)  # xBis zalezy tylko od pozycji 3 ciezarkow w poprzednim kroku: biezacego i 2 sasiadujacych
+                xPrim[k][j] = xPrim[k - 1][j] + h * xBis[k][j]
                 x[k][j] = x[k - 1][j] + h * xPrim[k][j]
 
         return t, x

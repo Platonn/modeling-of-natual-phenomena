@@ -13,11 +13,11 @@ connectedSprings = ConnectedSprings(np.array([
 ]))
 
 # zagadnienie poczatkowe:
-x_start = np.array([0, 1.1, 2])
+x_start = np.array([0, 1.5, 2])
 xPrim_start = np.array([0, 0, 0])
 t_start = 0
 
-t_end = 4
+t_end = 20
 stepsNum = 1000
 
 t, x = connectedSprings.eulerExplicit2(t_start, x_start, xPrim_start, t_end, stepsNum)

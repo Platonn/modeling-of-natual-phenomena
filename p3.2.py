@@ -6,24 +6,28 @@ from ConnectedSprings import *
 
 connectedSprings = ConnectedSprings(np.array([
     # k, L, m
+    # numeracja sprezyn bedzie potem od 1 do N
     [None, None, None],
-    [1, 1, 1]
+    [1, 1, 1],
+    [1, 1, None]  # ostatnia sprezyna istnieje(!) - ma swoje k i L
 ]))
-# fun_scaffold = lambda t, x, x1, k, m: (-k / m * x)
-# fun = lambda t, x, x1: fun_scaffold(t, x, x1, 1, 1)
 
-# ySolution = lambda x: (4 * x + 9 * math.exp(4 * x) - 1) / 8
-
-# eulerMethod = EulerMethod(fun, 0, 0, 20, 100)
-
+# zagadnienie poczatkowe:
+x_start = np.array([0, 1.1, 2])
+xPrim_start = np.array([0, 0, 0])
 t_start = 0
-x_start = np.array([1.5])
-xPrim_start = np.array([0])
-t_end = 20
-stepsNum = 100
 
+t_end = 4
+stepsNum = 1000
 
 t, x = connectedSprings.eulerExplicit2(t_start, x_start, xPrim_start, t_end, stepsNum)
 
-plt.plot(t, x, label='connectedSprings.eulerExplicit2')
+for j in range(0, connectedSprings.N):
+    # print('t.shape', t.shape)
+    # print('x[:][j].shape', x[:, j].shape)
+    # print('------------')
+    plt.plot(t, x[:, j], label='x' + str(j))
+
+# plt.plot(t, t, label='t') #spike
+plt.legend()
 plt.show()

@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import math
 
 from EulerMethod import *
-from ConnectedSprings import *
+from ConnectedSpringsRow import *
 
-connectedSprings = ConnectedSprings(np.array([
+connectedSprings = ConnectedSpringsRow(np.array([
     # k, L, m
     # numeracja sprezyn bedzie potem od 1 do N
     [None, None, None],
@@ -22,6 +22,8 @@ t_start = 0
 t_end = 20
 stepsNum = 2000
 
+fps = stepsNum / 20
+
 #spike-debug-old:
 # t, x = connectedSprings.eulerExplicit2(t_start, x_start, xPrim_start, t_end, stepsNum)
 #
@@ -36,4 +38,4 @@ stepsNum = 2000
 # plt.show()
 
 #spike-new-video:
-connectedSprings.draw(t_start, x_start, xPrim_start, t_end, stepsNum)
+connectedSprings.draw(t_start, x_start, xPrim_start, t_end, stepsNum, fps)

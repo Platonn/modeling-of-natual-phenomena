@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 
-class ConnectedSprings:
+
+class ConnectedSpringsRow:
     def __init__(self, springsParams):
         # 0 index is None
         self.N, _ = springsParams.shape
@@ -66,15 +68,15 @@ class ConnectedSprings:
 
         return t, x
 
-    def draw(self, t_start, x_start, xPrim_start, t_end, stepsNum):
+    def draw(self, t_start, x_start, xPrim_start, t_end, stepsNum, fps):
         t, x = self.eulerExplicit2(t_start, x_start, xPrim_start, t_end, stepsNum)
 
         videoWidth = 640
         videoHeight = 30
 
-        fps = 100
 
         video = cv2.VideoWriter(
+            'out/'
             'connectedSprings.avi',
             cv2.VideoWriter_fourcc(*'MJPG'),
             fps, (videoWidth, videoHeight))
@@ -86,9 +88,9 @@ class ConnectedSprings:
 
 
             # springs free-state positions:
-            for j in range(self.N):
+            for j in range(1, self.N-1):
                 spring_free_pos_x = int(videoWidth * (np.sum(self.L[1:j]) / (np.max(x_start) - np.min(x_start))))
-                cv2.circle(img, (spring_free_pos_x, pos_y), 4, (0, 255, 0), -1)
+                cv2.circle(img, (spring_free_pos_x, pos_y), 3+self.m[j], (0, 255, 0), -1)
 
 
             for j in range(self.N):
@@ -114,3 +116,15 @@ class ConnectedSprings:
 
             video.write(img.clip(0, 255).astype(np.uint8))
         video.release()
+
+
+        #plot:
+        for j in range(0, self.N):
+            # print('t.shape', t.shape)
+            # print('x[:][j].shape', x[:, j].shape)
+            # print('------------')
+            plt.plot(t, x[:, j], label='x' + str(j))
+
+        # plt.plot(t, t, label='t') #spike
+        plt.legend()
+        plt.show()

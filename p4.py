@@ -4,36 +4,27 @@ import math
 from ConnectedSpringsGrid import *
 from EulerMethod import *
 
-connectedSpringsGrid = ConnectedSpringsGrid(
-    k=4,
-    L=1,
-    r=0.001,
-    mArray=np.array([
-        [None, None, None, None, None, None],
-        [None, 1, 2, 1, 1, None],
-        [None, 1, 1, 3, 1, None],
-        [None, 1, 1, 1, 10, None],
-        [None, None, None, None, None, None]
-    ])
-)
+N = 5
+M = 5
+L = 1
+dim = 2  # dimensions
+r = 0.001
+k = 4
 
-# zagadnienie poczatkowe:
-# pozycja ma 2 wspolrzedne:
-xy_start = np.array([
-    [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]],
-    [[1, 0], [1.5, 1.5], [1.2, 2], [1, 3], [1, 4], [1, 5]],
-    [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5]],
-    [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5]],
-    [[4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5]]
-])
-# predkosc ma 2 wspolrzedne:
-xyPrim_start = np.array([
-    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
-    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
-    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
-    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
-    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
-])
+m = np.array([[1 for i in range(M)] for j in range(N)], np.float64)
+
+y0 = np.array([[[L * j, L * i] for i in range(M)] for j in range(N)], np.float64)
+y0[1, 1] += [1, 1]
+
+y1 = np.zeros((N, M, dim))
+
+ivp = np.array([y0, y1])
+
+connectedSpringsGrid = ConnectedSpringsGrid(k=k, L=L, r=r, mArray=m)
+
+xy_start = ivp[0]
+xyPrim_start = ivp[1]
+
 t_start = 0
 
 t_end = 20
@@ -41,8 +32,7 @@ stepsNum = 1000
 
 fps = stepsNum / 20
 
-t, xy = connectedSpringsGrid.eulerExplicit2(t_start, xy_start, xyPrim_start, t_end, stepsNum)
-
+# t, xy = connectedSpringsGrid.eulerExplicit2(t_start, dim, ivp, t_end, stepsNum)
 # # debug X:
 # for i in range(0, connectedSpringsGrid.N):
 #     for j in range(0, connectedSpringsGrid.M):
@@ -60,6 +50,6 @@ t, xy = connectedSpringsGrid.eulerExplicit2(t_start, xy_start, xyPrim_start, t_e
 
 # draw:
 fileName = 'out/connectedSpringsGrid.avi'
-connectedSpringsGrid.draw(t_start, xy_start, xyPrim_start, t_end, stepsNum, fps, fileName)
+connectedSpringsGrid.draw(t_start, dim, ivp, t_end, stepsNum, fps, fileName)
 
 os.system("xdg-open " + fileName)

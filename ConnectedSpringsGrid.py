@@ -68,7 +68,7 @@ class ConnectedSpringsGrid:
         t = np.zeros(stepsNum)
 
         t[0] = t_start
-        y[0, :, :, :, :] = ivp[:, :, :, :]  # y w chwili 0 = ivp
+        y[0] = ivp  # y w chwili 0 = ivp
 
         for k in range(1, stepsNum):  # from 1, because 0 is t_start - handled above
             for i in range(self.N):
@@ -77,13 +77,8 @@ class ConnectedSpringsGrid:
                     t[k] = t_start + k * h
 
                     # (k-1) means getting value from step before:
-
-
-                    posBisTemp = f(
-                        # xBis zalezy tylko od pozycji 5 ciezarkow w poprzednim kroku: biezacego i 4 sasiadujacych; oraz od predkosci biezacego ciezarka w poprzenim kroku
-                        i, j, k, y)
-                    y[k, 1, i, j] = y[k - 1, 1, i, j] + h * posBisTemp
-                    y[k, 0, i, j] = y[k - 1, 0, i, j] + h * y[k, 1, i, j]
+                    y[k, 1, i, j] = y[k - 1, 1, i, j] + h * f(i, j, k, y)
+                    y[k, 0, i, j] = y[k - 1, 0, i, j] + h * y[k - 1, 1, i, j]  # UWAGA TERAZ JEST PRAWDZIWY EULER
         return t, y
 
     def draw(self, dimensions, t_start, ivp, t_end, stepsNum, fps, fileName):

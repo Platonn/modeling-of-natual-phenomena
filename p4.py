@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import math
 
+from Solver import *
 from ConnectedSpringsGrid import *
-from EulerMethod import *
 
-N = 4
-M = 4
+N = 3
+M = 3
 L = 1
 dim = 2  # dimensions
 r = 0.001
@@ -22,7 +22,7 @@ y1 = np.zeros((N, M, dim))
 
 ivp = np.array([y0, y1])
 
-connectedSpringsGrid = ConnectedSpringsGrid(k=k, L=L, r=r, mArray=m)
+connectedSpringsGrid = ConnectedSpringsGrid(k=k, L=L, r=r, mArray=m, ivp=ivp)
 
 t_start = 0
 
@@ -31,23 +31,27 @@ stepsNum = 1000
 
 fps = stepsNum / 20
 
-# t, y = connectedSpringsGrid.eulerExplicit2(derivativesNum, t_start, ivp, t_end, stepsNum)
+T, Y = Solver.solve(Solver.rk4, connectedSpringsGrid.f, connectedSpringsGrid.ivp, t_start, t_end, stepsNum)
+
+
 # debug X without walls:
-# print("t.shape", t.shape)
-# print("y.shape", y.shape)
-# for i in range(1, connectedSpringsGrid.N-1):
-#     for j in range(1, connectedSpringsGrid.M-1):
-#         plt.plot(t, y[:, 0, i, j, 1], label='x' + str(i) + str(j))
-# plt.legend()
-# plt.show()
-# # debug Y without walls:
-# for i in range(1, connectedSpringsGrid.N-1):
-#     for j in range(1, connectedSpringsGrid.M-1):
-#         plt.plot(t, y[:, 0, i, j, 0], label='y' + str(i) + str(j))
-# plt.legend()
-# plt.show()
+print("t.shape", T.shape)
+print("y.shape", Y.shape)
+for i in range(1, connectedSpringsGrid.N-1):
+    for j in range(1, connectedSpringsGrid.M-1):
+        plt.plot(T, Y[:, 0, i, j, 1], label='x' + str(i) + str(j))
+plt.legend()
+plt.show()
+# debug Y without walls:
+for i in range(1, connectedSpringsGrid.N-1):
+    for j in range(1, connectedSpringsGrid.M-1):
+        plt.plot(T, Y[:, 0, i, j, 0], label='y' + str(i) + str(j))
+plt.legend()
+plt.show()
 
 # draw:
 fileName = 'out/connectedSpringsGrid.avi'
-connectedSpringsGrid.draw(derivativesNum, t_start, ivp, t_end, stepsNum, fps, fileName)
+connectedSpringsGrid.draw(T, Y, stepsNum, fps, fileName)
+
+
 os.system("xdg-open " + fileName)

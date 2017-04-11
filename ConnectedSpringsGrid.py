@@ -3,11 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+
 class ConnectedSpringsGrid:
-    def __init__(self, k, L, r, mArray):
+    def __init__(self, k, L, r, mArray, ivp):
         self.L = L
         self.k = k
         self.r = r
+        self.ivp = ivp
 
         # 0 index is None and last is None
         (self.N, self.M) = mArray.shape
@@ -64,22 +66,7 @@ class ConnectedSpringsGrid:
 
         return result
 
-    def eulerExplicit2(self, derivativesNum, t_start, ivp, t_end, stepsNum):
-        h = abs(t_end - t_start) / (stepsNum)
-        Y = np.zeros((stepsNum, derivativesNum, self.N, self.M, 2))
-        T = np.arange(t_start, t_end, h)
-
-        Y[0] = ivp  # y in moment 0 = ivp
-        for ti in range(1, len(T)):
-            Y[ti] = self.naiveEulerMethod(self.f, T[ti - 1], Y[ti - 1], h)
-        return T, Y
-
-    def naiveEulerMethod(self, f, t, y, h):
-        return y + h * f(t, y)
-
-    def draw(self, derivativesNum, t_start, ivp, t_end, stepsNum, fps, fileName):
-        t, y = self.eulerExplicit2(derivativesNum, t_start, ivp, t_end, stepsNum)
-
+    def draw(self, T, Y, stepsNum, fps, fileName):
         videoWidth = 200 * self.M
         videoHeight = 200 * self.N
         video = cv2.VideoWriter(
@@ -88,7 +75,7 @@ class ConnectedSpringsGrid:
             fps, (videoWidth, videoHeight))
 
         # cache values:
-        y0 = ivp[0]
+        y0 = self.ivp[0]
         rightWall = np.max(y0[:, :, self.X])
         leftWall = np.min(y0[:, :, self.X])
         bottomWall = np.max(y0[:, :, self.Y])
@@ -109,11 +96,11 @@ class ConnectedSpringsGrid:
             img = np.ones((videoHeight, videoWidth, 3), np.uint8) * 45
             for i in range(self.N):
                 for j in range(self.M):
-                    spring_current_pos = getPos(y[k, 0, i, j])
+                    spring_current_pos = getPos(Y[k, 0, i, j])
                     current_weight = self.m[i, j]
 
-                    spring_left_pos = getPos(y[k, 0, i, j - 1])
-                    spring_top_pos = getPos(y[k, 0, i - 1, j])
+                    spring_left_pos = getPos(Y[k, 0, i, j - 1])
+                    spring_top_pos = getPos(Y[k, 0, i - 1, j])
 
                     if (i != 0 and j != 0):
                         # springs:

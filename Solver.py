@@ -21,7 +21,7 @@ class Solver:
         return T, Y
 
     @staticmethod
-    def newton(f, t, y, h):
+    def euler(f, t, y, h):
         return y + h * f(t, y)
 
     @staticmethod

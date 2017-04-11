@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-
 class ConnectedSpringsGrid:
     def __init__(self, k, L, r, mArray):
         self.L = L
@@ -21,6 +20,20 @@ class ConnectedSpringsGrid:
     def norm(self, A):
         return np.linalg.norm(A)
 
+    def sumPowersF(self, i, j, y):
+        pos_current = y[0][i, j]
+        pos_left = y[0][i, j - 1]
+        pos_right = y[0][i, j + 1]
+        pos_top = y[0][i - 1, j]
+        pos_bottom = y[0][i + 1, j]
+
+        return (
+            self.powerF(pos_current, pos_left) +
+            self.powerF(pos_current, pos_right) +
+            self.powerF(pos_current, pos_top) +
+            self.powerF(pos_current, pos_bottom)
+        )
+
     def powerF(self, A, B):
         d = self.norm(B - A)
         L = self.L
@@ -30,59 +43,42 @@ class ConnectedSpringsGrid:
         )
         return result
 
-    def powerG(self, velocity):
+    def powerG(self, i, j, y):
+        velocity = y[1][i, j]
         alfa = 1  # TODO: values to test: 1,2
         velocity_norm = self.norm(velocity)
         result = - self.r * (velocity_norm ** (alfa - 1)) * velocity
         return result
 
-    def getFunPosBis(self):
-        def resultFun(i, j, k, y):
-            if i == 0 or i == self.N - 1 or j == 0 or j == self.M - 1:
-                return 0  # start and end walls are not accelerating
-            else:
-                pos_current = y[k - 1, 0, i, j]
-                pos_left = y[k - 1, 0, i, j - 1]
-                pos_right = y[k - 1, 0, i, j + 1]
-                pos_top = y[k - 1, 0, i - 1, j]
-                pos_bottom = y[k - 1, 0, i + 1, j]
-                posPrim_current = y[k - 1, 1, i, j]
+    def f(self, t, y):
+        (derivativesNum, N, M, dimensions) = y.shape
+        result = np.zeros(y.shape)
+        for i in range(N):
+            for j in range(M):
+                result[0, i, j] = y[1, i, j]
 
-                return (
-                           self.powerF(pos_current, pos_left) +
-                           self.powerF(pos_current, pos_right) +
-                           self.powerF(pos_current, pos_top) +
-                           self.powerF(pos_current, pos_bottom) +
-                           self.powerG(posPrim_current)
+                if i == 0 or i == self.N - 1 or j == 0 or j == self.M - 1:
+                    result[1, i, j] = 0  # start and end walls have zero velocity
+                else:
+                    result[1, i, j] = (self.sumPowersF(i, j, y) + self.powerG(i, j, y)) / self.m[i, j]
 
-                       ) / self.m[i, j]
+        return result
 
-        return resultFun
+    def eulerExplicit2(self, derivativesNum, t_start, ivp, t_end, stepsNum):
+        h = abs(t_end - t_start) / (stepsNum)
+        Y = np.zeros((stepsNum, derivativesNum, self.N, self.M, 2))
+        T = np.arange(t_start, t_end, h)
 
-    def eulerExplicit2(self, dimensions, t_start, ivp, t_end, stepsNum):
-        h = abs(t_end - t_start) / (stepsNum - 1)
-        f = self.getFunPosBis()
+        Y[0] = ivp  # y in moment 0 = ivp
+        for ti in range(1, len(T)):
+            Y[ti] = self.naiveEulerMethod(self.f, T[ti - 1], Y[ti - 1], h)
+        return T, Y
 
-        # derivative number, step, posY, posX, value(y/x)=0/1)
-        y = np.zeros((stepsNum, dimensions, self.N, self.M, 2))
-        t = np.zeros(stepsNum)
+    def naiveEulerMethod(self, f, t, y, h):
+        return y + h * f(t, y)
 
-        t[0] = t_start
-        y[0] = ivp  # y w chwili 0 = ivp
-
-        for k in range(1, stepsNum):  # from 1, because 0 is t_start - handled above
-            for i in range(self.N):
-                for j in range(self.M):
-                    # print('i j', i, j)  # spike
-                    t[k] = t_start + k * h
-
-                    # (k-1) means getting value from step before:
-                    y[k, 1, i, j] = y[k - 1, 1, i, j] + h * f(i, j, k, y)
-                    y[k, 0, i, j] = y[k - 1, 0, i, j] + h * y[k - 1, 1, i, j]  # UWAGA TERAZ JEST PRAWDZIWY EULER
-        return t, y
-
-    def draw(self, dimensions, t_start, ivp, t_end, stepsNum, fps, fileName):
-        t, y = self.eulerExplicit2(t_start, dimensions, ivp, t_end, stepsNum)
+    def draw(self, derivativesNum, t_start, ivp, t_end, stepsNum, fps, fileName):
+        t, y = self.eulerExplicit2(derivativesNum, t_start, ivp, t_end, stepsNum)
 
         videoWidth = 200 * self.M
         videoHeight = 200 * self.N
@@ -104,7 +100,9 @@ class ConnectedSpringsGrid:
         def getPos(pos):
             y = pos[self.Y]
             x = pos[self.X]
-            return [int(videoHeight * (y / boxHeight)), int(videoWidth * (x / boxWidth))]
+            resultY = videoHeight * (y / boxHeight)
+            resultX = videoWidth * (x / boxWidth)
+            return [int(resultY), int(resultX)]
 
         for k in range(stepsNum):
             # prepare canvas:
@@ -113,12 +111,10 @@ class ConnectedSpringsGrid:
                 for j in range(self.M):
                     spring_current_pos = getPos(y[k, 0, i, j])
                     current_weight = self.m[i, j]
-                    # print('k,i,j,x,y', k, i, j, spring_current_pos[self.X], spring_current_pos[self.Y]) #spike
 
                     spring_left_pos = getPos(y[k, 0, i, j - 1])
                     spring_top_pos = getPos(y[k, 0, i - 1, j])
 
-                    # spike; NIE BEADA SIE WYSWIETLAC LINIE TERAZ!!!!!!!!!!:
                     if (i != 0 and j != 0):
                         # springs:
                         lineColor = (240, 240, 240)
@@ -142,8 +138,5 @@ class ConnectedSpringsGrid:
                                circleColor,
                                -1)
 
-            # cv2.imshow('step ' + str(k), img)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
             video.write(img.clip(0, 255).astype(np.uint8))
         video.release()

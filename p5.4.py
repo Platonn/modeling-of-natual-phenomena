@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import math
 
+from MathPendulumSpring import MathPendulumSpring
 from Solver import *
 from MathPendulum import *
 
@@ -10,17 +11,25 @@ from MathPendulum import *
 
 L = 1  # spike: np.array([1])
 dim = 2  # dimensions
-derivativesNum = 2
-m = np.array([1])
+derivativesNum = 4
+m = np.array([2])
 g = 10  # spike 9.81
-r = 0.1
+resist = 0.1
+k = 100
 
 # prepare ivp:
-y0 = np.array([np.pi / 2])
-y1 = np.array([0])
-ivp = np.array([y0, y1])
+ivp_theta = np.array([np.pi / 2])
+ivp_thetaPrim = np.array([0])
+ivp_r = np.array([0])
+ivp_rPrim = np.array([0])
+ivp = np.array([
+    ivp_theta,
+    ivp_thetaPrim,
+    ivp_r,
+    ivp_rPrim
+])
 
-mathPendulum = MathPendulum(g, m, L, r, ivp)
+mathPendulumSpring = MathPendulumSpring(g, m, L, resist, ivp, k)
 
 t_start = 0
 
@@ -29,9 +38,9 @@ stepsNum = 1000
 
 fps = stepsNum / 20
 
-T, Y = Solver.solve(Solver.rk4, mathPendulum.f, mathPendulum.ivp, t_start, t_end, stepsNum)
+T, Y = Solver.solve(Solver.rk4, mathPendulumSpring.f, mathPendulumSpring.ivp, t_start, t_end, stepsNum)
 
-euclideanY = mathPendulum.angular2Euclidean(Y)
+euclideanY = mathPendulumSpring.angular2Euclidean(Y)
 
 # # debug theta
 # # print("y.shape", Y.shape)
@@ -50,16 +59,16 @@ euclideanY = mathPendulum.angular2Euclidean(Y)
 #
 # debug euclidean X
 # print("y.shape", euclideanY.shape)
-# plt.plot(T, euclideanY[:, 0, 0, mathPendulum.indexX], label='euclidean x')
+# plt.plot(T, euclideanY[:, 0, 0, mathPendulumSpring.indexX], label='euclidean x')
 # plt.legend()
 # plt.show()
 # # debug euclidean Y
-# plt.plot(T, euclideanY[:, 0, 0, mathPendulum.indexY], label='euclidean y')
+# plt.plot(T, euclideanY[:, 0, 0, mathPendulumSpring.indexY], label='euclidean y')
 # plt.legend()
 # plt.show()
 
 # draw:
-fileName = 'out/MathPendulum.avi'
+fileName = 'out/MathPendulumSpring.avi'
 
 boxModifier = 1.1
 box = {
@@ -69,6 +78,6 @@ box = {
     'yMax': L * 1.5
 }
 
-mathPendulum.draw(T, euclideanY, box, stepsNum, fps, fileName)
+mathPendulumSpring.draw(T, euclideanY, box, stepsNum, fps, fileName)
 
 os.system("xdg-open " + fileName)

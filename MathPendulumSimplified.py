@@ -11,7 +11,7 @@ class MathPendulumSimplified(MathPendulum):
             result[0, i] = y[1, i]
 
             gravityPendulumForce = -self.g / self.L * y[0, i] #simplified = not np.sin(y[0,i]
-            resistanceForce = - self.r * self.L * y[1, i]
+            resistanceForce = - self.resist * self.L * y[1, i]
             result[1, i] = gravityPendulumForce + resistanceForce
 
         return result

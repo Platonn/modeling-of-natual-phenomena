@@ -1,21 +1,13 @@
 import cv2
 import numpy as np
 
+from MathPendulum import MathPendulum
 
-class MathPendulum:
-    def __init__(self, g, mArray, L, resist, ivp):
-        self.L = L
-        self.g = g
-        self.m = mArray
-        self.resist = resist
-        self.ivp = ivp
 
-        print("mArray.shape", mArray.shape)
-        (self.N,) = mArray.shape
-
-        # indexes: # EUCLIDEAN AXIS ORDER IS NORMAL: x,y,z,..
-        self.indexX = 0
-        self.indexY = 1
+class MathPendulumSpring(MathPendulum):
+    def __init__(self, g, mArray, L, resist, ivp, k):
+        super().__init__(g, mArray, L, resist, ivp)
+        self.k = k
 
     def angular2Euclidean(self, Y):
         euclideanDimensions = 2
@@ -26,12 +18,16 @@ class MathPendulum:
 
         theta = Y[:, 0]
         thetaPrim = Y[:, 1]
+        r = Y[:, 2]
+        rPrim = Y[:, 3]
 
-        euclideanY[:, 0, :, self.indexX] = self.L * np.sin(theta[:])
-        euclideanY[:, 0, :, self.indexY] = self.L * np.cos(theta[:])
+        euclideanY[:, 0, :, self.indexX] = (self.L + r) * np.sin(theta[:])
+        euclideanY[:, 0, :, self.indexY] = (self.L + r) * np.cos(theta[:])
 
-        euclideanY[:, 1, :, self.indexX] = self.L * thetaPrim[:] * np.sin(theta[:] + np.pi / 2)
-        euclideanY[:, 1, :, self.indexY] = self.L * thetaPrim[:] * np.cos(theta[:] + np.pi / 2)
+        euclideanY[:, 1, :, self.indexX] = (self.L + r) * thetaPrim[:] * np.sin(theta[:] + np.pi / 2)
+        euclideanY[:, 1, :, self.indexY] = (self.L + r) * thetaPrim[:] * np.cos(theta[:] + np.pi / 2)
+
+        # leave euclideanY[:, 2] and euclideanY[:, 3]
 
         return euclideanY
 
@@ -39,11 +35,19 @@ class MathPendulum:
         (derivativesNum, dimensions) = y.shape
         result = np.zeros(y.shape)
         for i in range(self.N):
-            result[0, i] = y[1, i]
+            # cache variables
+            theta = y[0, i]
+            thetaPrim = y[1, i]
+            r = y[2, i]
+            rPrim = y[3, i]
 
-            gravityPendulumForce = -self.g / self.L * np.sin(y[0, i])
-            resistanceForce = - self.resist * self.L * y[1, i]
-            result[1, i] = gravityPendulumForce + resistanceForce
+            # theta and thetaPrim:
+            result[0, i] = thetaPrim
+            result[1, i] = - (self.g * np.sin(theta) + 2 * rPrim * thetaPrim) / (self.L + r)
+
+            # r and rPrim:
+            result[2, i] = rPrim
+            result[3, i] = self.g * np.cos(theta) + (self.L + r) * (thetaPrim ** 2) - self.k / self.m[i] * r
 
         return result
 

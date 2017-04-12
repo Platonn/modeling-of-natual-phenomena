@@ -14,6 +14,7 @@ dim = 2  # dimensions
 derivativesNum = 2
 m = np.array([1])
 g = 10  # spike 9.81
+r = 0.0001
 
 # prepare ivp:
 y0 = np.array([np.pi])

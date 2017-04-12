@@ -3,10 +3,11 @@ import numpy as np
 
 
 class MathPendulum:
-    def __init__(self, g, mArray, L, ivp):
+    def __init__(self, g, mArray, L, r, ivp):
         self.L = L
         self.g = g
         self.m = mArray
+        self.r = r
         self.ivp = ivp
 
         print("mArray.shape", mArray.shape)
@@ -39,7 +40,10 @@ class MathPendulum:
         result = np.zeros(y.shape)
         for i in range(self.N):
             result[0, i] = y[1, i]
-            result[1, i] = -self.g / self.L * np.sin(y[0, i])
+
+            gravityPendulumForce = -self.g / self.L * np.sin(y[0, i])
+            resistanceForce = - self.r * self.L * y[1, i]
+            result[1, i] = gravityPendulumForce + resistanceForce
 
         return result
 
@@ -64,7 +68,6 @@ class MathPendulum:
             resultX = shape[self.indexX] * (velX) / (box['xMax'] - box['xMin'])
             resultY = shape[self.indexY] * (velY) / (box['yMax'] - box['yMin'])
             return np.array([int(resultX), int(resultY)])
-
 
         euclideanY[:, 1] *= 0.1  # scale velocity value
 

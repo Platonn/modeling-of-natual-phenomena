@@ -43,7 +43,6 @@ class MathPendulum:
 
         return result
 
-    # TODO: TOTALLY REWRITE IT:
     def draw(self, T, euclideanY, box, stepsNum, fps, fileName):
         shape = [800, 800]  # x,y
         video = cv2.VideoWriter(

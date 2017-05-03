@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,6 +9,7 @@ import os
 class Solver:
     @staticmethod
     def solve(method, f, ivp, t_start, t_end, stepsNum):
+        startTime = time.time()
         h = abs(t_end - t_start) / stepsNum
 
         shapeY = list(ivp.shape)
@@ -18,6 +21,7 @@ class Solver:
         Y[0] = ivp  # y in moment 0 = ivp
         for ti in range(1, len(T)):
             Y[ti] = method(f, T[ti - 1], Y[ti - 1], h)
+        print('time Solver.solve', time.time() - startTime)
         return T, Y
 
     @staticmethod

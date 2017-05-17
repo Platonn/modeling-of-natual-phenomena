@@ -125,6 +125,21 @@ class SlidingPendulum:
                 COLOR_BLOCK,
                 -1)
 
+        def _renderLine(img, posA, posB):
+            cv2.line(img, posA, posB, COLOR_LINE, 2)
+
+        def _renderBall(img, pos, ballId):
+            cv2.circle(img, pos, m[ballId], COLOR_BALLS[ballId], -1)
+
+        def _renderBalls():
+            for i in range(len(y_b)):
+                _renderBall(img, pos[i + 1], i)
+
+        def _renderLines():
+            for i in range(len(y_b)):
+                _renderLine(img, pos[i], pos[i + 1])
+
+
         y_b = y[1:]
 
         pos_block = getPos(y[0, 0] * meter_scale, 0)
@@ -135,13 +150,9 @@ class SlidingPendulum:
         _renderCenterPoint(img)
         _renderSpring(img, pos_block)
         _renderBlock(img, pos_block, m[0])
+        _renderLines()
+        _renderBalls()
 
-        # lines
-        for i in range(len(y_b)):
-            cv2.line(img, pos[i], pos[i + 1], COLOR_LINE, 2)
-        # balls
-        for i in range(len(y_b)):
-            cv2.circle(img, pos[i + 1], m[i], COLOR_BALLS[i], -1)
 
         return img
 

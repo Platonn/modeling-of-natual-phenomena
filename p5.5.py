@@ -18,13 +18,13 @@ from Solver import *
 # consts:
 
 x, dx, ddx, theta, dtheta, ddtheta = symbols('x dx ddx, theta, dtheta, ddtheta')
-k, m1, m2, l, g = symbols('k, m1, m2, l, g')
+k, m1, m2, l, g = symbols('k, m_block, m, l, g')
 
-Ek_block = 1 / 2 * m1 * (dx ** 2)
-Ek_pend = 1 / 2 * m2 * (l ** 2 * dtheta ** 2 + dx ** 2 + 2 * l * dx * dtheta * cos(theta))  ##spike - double check it
+Ek_block = 0.5 * m1 * (dx ** 2)
+Ek_pend = 0.5 * m2 * (l ** 2 * dtheta ** 2 + dx ** 2 + 2 * l * dx * dtheta * cos(theta))  ##spike - double check it
 Ek = Ek_block + Ek_pend
 
-Ep_block = 1 / 2 * k * (x ** 2)
+Ep_block = 0.5 * k * (x ** 2)
 Ep_pend = - m2 * g * l * cos(theta)
 Ep = Ep_block + Ep_pend
 
@@ -34,8 +34,10 @@ freedom_coordinants = [
     [x, dx, ddx],
     [theta, dtheta, ddtheta]
 ]
+print(freedom_coordinants)
 
 ddqs_functions = AccelerationEquationsFinder.getFromLagrangian(Ep, Ek, freedom_coordinants)
+print(ddqs_functions)
 N = len(freedom_coordinants)
 
 

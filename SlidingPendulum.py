@@ -13,23 +13,26 @@ from Solver import *
 
 
 class SlidingPendulum:
-    def __init__(self, g, l, m1, k, m2):
+    def __init__(self, g, l, m_block, k, m):
         self.g = g
         self.l = l
-        self.m1 = m1
+        self.m_block = m_block
         self.k = k
-        self.m2 = m2
+        self.m = m
 
     def prepareAndGetF(self, ddqs_functions, freedom_coordinants):
         N = len(freedom_coordinants)
         for (_, _, ddq) in freedom_coordinants:
             ddqs_functions[ddq] = ddqs_functions[ddq].subs([
                 (Symbol('g'), self.g),
-                (Symbol('l'), self.l),
-                (Symbol('m1'), self.m1),
-                (Symbol('k'), self.k),
-                (Symbol('m2'), self.m2),
+                (Symbol('k'), self.k)
+                (Symbol('m_block'), self.m_block)
             ])
+            for i in range(len(self.m)):
+                ddqs_functions[ddq] = ddqs_functions[ddq].subs([
+                    (Symbol('m[%d]'%(i,)), self.m[i]),
+                    (Symbol('l[%d]'%(i,)), self.l[i])
+                ])
 
         def f(t, y):
             ddqs_functions_numeric = ddqs_functions.copy()
@@ -58,7 +61,7 @@ class SlidingPendulum:
         N = len(freedom_coordinants)
         with open('SlidingPendulum_cachedGetF.py', 'w') as fd:
             fd.write('from numpy import sin, cos, zeros_like\n')
-            fd.write('def getF(g, l, m1, k, m2):\n')
+            fd.write('def getF(g, l, m_block, k, m):\n')
             fd.write('    def f(t, y):\n')
             fd.write('        result = zeros_like(y)\n')
 
@@ -71,7 +74,7 @@ class SlidingPendulum:
 
     def getCachedF(self):
         import SlidingPendulum_cachedGetF
-        return SlidingPendulum_cachedGetF.getF(self.g, self.l, self.m1, self.k, self.m2)
+        return SlidingPendulum_cachedGetF.getF(self.g, self.l, self.m_block, self.k, self.m)
 
     @staticmethod
     def mass_to_radius(m, min_r, max_r):

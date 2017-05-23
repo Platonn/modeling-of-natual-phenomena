@@ -65,12 +65,12 @@ N = len(freedom_coordinants)
 
 val_g = 9.80665
 val_l = [1]
-val_mBlock = 1
-val_mPendulums = [1]
+val_m_block = 1
+val_m = [1]
 val_k = 5
 ###
 
-slidingPendulum = SlidingPendulum(val_g, val_l, val_mBlock, val_k, val_mPendulums)
+slidingPendulum = SlidingPendulum(val_g, val_l, val_m_block, val_k, val_m)
 # f = slidingPendulum.prepareAndGetF(ddqs_functions, freedom_coordinants) #SLOW VERSION!!!
 slidingPendulum.prepareCachedF(ddqs_functions, freedom_coordinants)
 f = slidingPendulum.getCachedF()
@@ -87,15 +87,13 @@ stepsNum = 1000
 T, Y = Solver.solve(Solver.rk4, f, ivp, t_start, t_end, stepsNum)
 
 # CHARTS:
-print("y.shape", Y.shape)
-plt.plot(T, Y[:, 0, 0], label='x')
-plt.legend()
-plt.show()
-plt.plot(T, Y[:, 1, 0], label='theta')
-plt.legend()
-plt.show()
+# print("y.shape", Y.shape)
+# plt.plot(T, Y[:, 0, 0], label='x')
+# plt.legend()
+# plt.show()
+# plt.plot(T, Y[:, 1, 0], label='theta')
+# plt.legend()
+# plt.show()
 
-# M = np.array([m_block, m])
-# l = np.array([l, 0])
-# path = SlidingPendulum.draw(T, Y, l, M, 800, '1')
-# os.system("xdg-open " + path)
+path = SlidingPendulum.draw(T, Y, val_l, val_m, val_m_block, 800, '1')
+os.system("xdg-open " + path)

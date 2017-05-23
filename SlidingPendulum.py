@@ -77,15 +77,7 @@ class SlidingPendulum:
         return SlidingPendulum_cachedGetF.getF(self.g, self.l, self.m_block, self.k, self.m)
 
     @staticmethod
-    def mass_to_radius(m, min_r, max_r):
-        if (np.max(m) == np.min(m)):
-            r = np.ones_like(m) * max_r
-        else:
-            r = (m - np.min(m)) * ((max_r - min_r) / (np.max(m) - np.min(m))) + min_r
-        return r.astype(int)
-
-    @staticmethod
-    def render_frame(y, l, m, canvas, meter_scale=1):
+    def render_frame(y, l_scaled, m_scaled, canvas, scale):
         shape = canvas.shape
         posCenter = (centerX, centerY) = (shape[0] // 2, shape[1] // 2)
         getPos = lambda posX, posY: (centerX + int(posX), centerY + int(posY))
@@ -98,16 +90,17 @@ class SlidingPendulum:
             [64, 133, 205]
         ]
         COLOR_CENTER_POINT = COLOR_SPRING
+        BALL_RADIUS = 12
 
         def y_to_pos(y, l, pos_start):
             pos = []
             pos.append(pos_start)
             for i in range(len(y)):
                 theta = y[i, 0]
-                # print(l[i], theta)
+                # print('l[i], theta:', l[i], theta)
                 x = pos[i][0] + int(l[i] * np.sin(theta))
                 y = pos[i][1] + int(l[i] * np.cos(theta))
-                # print(x, y)
+                # print('x,y:', x, y)
                 pos.append((x, y))
             return pos
 
@@ -120,7 +113,7 @@ class SlidingPendulum:
 
         def _renderBlock(img, pos_block, m_block):
             scale_block = 1
-            m_block_scaled = m_block * scale_block
+            m_block_scaled = int(m_block * scale_block)
             cv2.rectangle(
                 img,
                 (pos_block[0] - m_block_scaled, pos_block[1] - m_block_scaled),
@@ -132,7 +125,7 @@ class SlidingPendulum:
             cv2.line(img, posA, posB, COLOR_LINE, 2)
 
         def _renderBall(img, pos, ballId):
-            cv2.circle(img, pos, m[ballId], COLOR_BALLS[ballId], -1)
+            cv2.circle(img, pos, BALL_RADIUS, COLOR_BALLS[ballId], -1)
 
         def _renderBalls():
             for i in range(len(y_b)):
@@ -145,14 +138,14 @@ class SlidingPendulum:
 
         y_b = y[1:]
 
-        pos_block = getPos(y[0, 0] * meter_scale, 0)
-        pos = y_to_pos(y_b, l, pos_block)
+        pos_block = getPos(y[0, 0] * scale, 0)
+        pos = y_to_pos(y_b, l_scaled, pos_block)
 
         img = canvas.copy()
 
         _renderCenterPoint(img)
         _renderSpring(img, pos_block)
-        _renderBlock(img, pos_block, m[0])
+        _renderBlock(img, pos_block, m_scaled[0])
         _renderLines()
         _renderBalls()
 
@@ -160,7 +153,7 @@ class SlidingPendulum:
         return img
 
     @staticmethod
-    def draw(t, y, l, m, size, fileNameSuffix):
+    def draw(t, y, l, m, m_block, size, fileNameSuffix):
         fps = int(len(t) / t[-1])
         path = 'out/SlidingPendulum_' + fileNameSuffix + '_' + str(time.time()) + '.avi'
         video = cv2.VideoWriter(
@@ -172,11 +165,13 @@ class SlidingPendulum:
 
         canvas = np.zeros((size, size, 3))
 
-        meter_scale = size / np.sum(l) * 0.3
-        l_scaled = l * meter_scale
-        m_scaled = SlidingPendulum.mass_to_radius(m, 6, 12)
+        scale = size / np.sum(l) * 0.3
+
+        l_scaled = np.array(l) * scale
+        m_scaled = np.array(m) * 12
+
         for i in range(len(t)):
-            frame = SlidingPendulum.render_frame(y[i], l_scaled, m_scaled, canvas, meter_scale)
+            frame = SlidingPendulum.render_frame(y[i], l_scaled, m_scaled, canvas, scale)
             video.write(frame.clip(0, 255).astype(np.uint8))
         video.release()
 

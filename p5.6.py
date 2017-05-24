@@ -15,9 +15,9 @@ from Solver import *
 ###
 
 val_g = 9.80665
-val_l = [1, 2, 3]
+val_l = [1]
 val_m_block = 1
-val_m = [2, 1, 0.5]
+val_m = [2]
 val_k = 5
 ###
 
@@ -60,22 +60,20 @@ L = Ek - Ep
 freedom_coordinants = [[x, dx, ddx]] + thetas  # merge lists
 print(freedom_coordinants)
 #
-# ddqs_functions = AccelerationEquationsFinder.getFromLagrangian(Ep, Ek, freedom_coordinants)
-# print(ddqs_functions)
+ddqs_functions = AccelerationEquationsFinder.getFromLagrangian(Ep, Ek, freedom_coordinants)
+print(ddqs_functions)
 
 N = len(freedom_coordinants)
 
 
 slidingPendulum = SlidingPendulum(val_g, val_l, val_m_block, val_k, val_m)
 # f = slidingPendulum.prepareAndGetF(ddqs_functions, freedom_coordinants) #SLOW VERSION!!!
-# slidingPendulum.prepareCachedF(ddqs_functions, freedom_coordinants)
+slidingPendulum.prepareCachedF(ddqs_functions, freedom_coordinants)
 f = slidingPendulum.getCachedF()
 
 ivp = np.array([
     [0, 0],
-    [3, 0],
-    [0, 5],
-    [0, 10]
+    [3, 0]
 ])
 
 t_start = 0

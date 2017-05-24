@@ -12,12 +12,19 @@ from AccelerationEquationsFinder import *
 from SlidingPendulum import *
 from Solver import *
 
-# Wyliczyć wzór na theta'' i x'' z langrangiana
-# \-> Spróbować najpierw na prostym F = ma ( -kx = m x'' )
+###
+
+val_g = 9.80665
+val_l = [1, 2, 3]
+val_m_block = 1
+val_m = [2, 1, 0.5]
+val_k = 5
+###
+
 
 # consts:
 
-ballsNum = 1
+ballsNum = len(val_m)
 
 # constants:
 k, g = symbols('k, g')
@@ -32,13 +39,13 @@ thetas = [[Symbol('theta[%d]' % (i,)), Symbol('dtheta[%d]' % (i,)), Symbol('ddth
 
 Ek = 0
 Ek += 1 / 2 * m_block * (dx ** 2)  # Ek block
-current_vel_hori = dx # TODO: UWAGA, uwzgledniono w v_horizontal dx!
+current_vel_hori = dx  # TODO: UWAGA, uwzgledniono w v_horizontal dx!
 current_vel_vert = 0
 for i in range(ballsNum):
     [theta_i, dtheta_i, _] = thetas[i]
-    current_vel_vert += l[i] * dtheta_i * sin(theta_i) #spike + np.pi / 2)
-    current_vel_hori += l[i] * dtheta_i * cos(theta_i) #spike + np.pi / 2)
-    Ek += 0.5 * m[i] * (current_vel_hori ** 2 + current_vel_vert ** 2)  # Ek ball number i
+    current_vel_vert += l[i] * dtheta_i * sin(theta_i)
+    current_vel_hori += l[i] * dtheta_i * cos(theta_i)
+    Ek += 0.5 * m[i] * (current_vel_hori ** 2 + current_vel_vert ** 2)
 
 Ep = 0
 Ep += 0.5 * k * (x ** 2)  # Ep block
@@ -52,32 +59,23 @@ L = Ek - Ep
 
 freedom_coordinants = [[x, dx, ddx]] + thetas  # merge lists
 print(freedom_coordinants)
-
-# TODO: sprawdzic, czy dobre rownania wychodzą
-ddqs_functions = AccelerationEquationsFinder.getFromLagrangian(Ep, Ek, freedom_coordinants)
-print(ddqs_functions)
-
-## TODO: jesli wyjda te same rownania, to dostosowac render animacji do wielu kulek, mas, linek, i wartosci y
+#
+# ddqs_functions = AccelerationEquationsFinder.getFromLagrangian(Ep, Ek, freedom_coordinants)
+# print(ddqs_functions)
 
 N = len(freedom_coordinants)
 
-###
-
-val_g = 9.80665
-val_l = [1]
-val_m_block = 1
-val_m = [1]
-val_k = 5
-###
 
 slidingPendulum = SlidingPendulum(val_g, val_l, val_m_block, val_k, val_m)
 # f = slidingPendulum.prepareAndGetF(ddqs_functions, freedom_coordinants) #SLOW VERSION!!!
-slidingPendulum.prepareCachedF(ddqs_functions, freedom_coordinants)
+# slidingPendulum.prepareCachedF(ddqs_functions, freedom_coordinants)
 f = slidingPendulum.getCachedF()
 
 ivp = np.array([
     [0, 0],
-    [3, 0]
+    [3, 0],
+    [0, 5],
+    [0, 10]
 ])
 
 t_start = 0
@@ -91,7 +89,10 @@ T, Y = Solver.solve(Solver.rk4, f, ivp, t_start, t_end, stepsNum)
 # plt.plot(T, Y[:, 0, 0], label='x')
 # plt.legend()
 # plt.show()
-# plt.plot(T, Y[:, 1, 0], label='theta')
+# plt.plot(T, Y[:, 1, 0], label='theta[0]')
+# plt.legend()
+# plt.show()
+# plt.plot(T, Y[:, 2, 0], label='theta[1]')
 # plt.legend()
 # plt.show()
 

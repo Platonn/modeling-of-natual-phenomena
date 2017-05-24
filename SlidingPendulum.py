@@ -19,13 +19,14 @@ class SlidingPendulum:
         self.m_block = m_block
         self.k = k
         self.m = m
+        self.N = len(m)
 
     def prepareAndGetF(self, ddqs_functions, freedom_coordinants):
         N = len(freedom_coordinants)
         for (_, _, ddq) in freedom_coordinants:
             ddqs_functions[ddq] = ddqs_functions[ddq].subs([
                 (Symbol('g'), self.g),
-                (Symbol('k'), self.k)
+                (Symbol('k'), self.k),
                 (Symbol('m_block'), self.m_block)
             ])
             for i in range(len(self.m)):
@@ -59,7 +60,7 @@ class SlidingPendulum:
 
     def prepareCachedF(self, ddqs_functions, freedom_coordinants):
         N = len(freedom_coordinants)
-        with open('SlidingPendulum_cachedGetF.py', 'w') as fd:
+        with open('SlidingPendulum_cachedGetF_N%d.py'%(self.N,), 'w') as fd:
             fd.write('from numpy import sin, cos, zeros_like\n')
             fd.write('def getF(g, l, m_block, k, m):\n')
             fd.write('    def f(t, y):\n')
@@ -73,11 +74,16 @@ class SlidingPendulum:
             fd.write('    return f\n')
 
     def getCachedF(self):
-        import SlidingPendulum_cachedGetF
-        return SlidingPendulum_cachedGetF.getF(self.g, self.l, self.m_block, self.k, self.m)
+        if self.N==1:
+            import SlidingPendulum_cachedGetF_N1 as cached
+        elif self.N==2:
+            import SlidingPendulum_cachedGetF_N2 as cached
+        elif self.N==3:
+            import SlidingPendulum_cachedGetF_N3 as cached
+        return cached.getF(self.g, self.l, self.m_block, self.k, self.m)
 
     @staticmethod
-    def render_frame(y, l_scaled, m_scaled, canvas, scale):
+    def render_frame(y, l_scaled, m_scaled, m_block_scaled, canvas, scale):
         shape = canvas.shape
         posCenter = (centerX, centerY) = (shape[0] // 2, shape[1] // 2)
         getPos = lambda posX, posY: (centerX + int(posX), centerY + int(posY))
@@ -96,12 +102,12 @@ class SlidingPendulum:
             pos = []
             pos.append(pos_start)
             for i in range(len(y)):
+                # print('y:', y)
                 theta = y[i, 0]
-                # print('l[i], theta:', l[i], theta)
-                x = pos[i][0] + int(l[i] * np.sin(theta))
-                y = pos[i][1] + int(l[i] * np.cos(theta))
+                pos_x = pos[i][0] + int(l[i] * np.sin(theta))
+                pos_y = pos[i][1] + int(l[i] * np.cos(theta))
                 # print('x,y:', x, y)
-                pos.append((x, y))
+                pos.append((pos_x, pos_y))
             return pos
 
         def _renderCenterPoint(img):
@@ -113,11 +119,11 @@ class SlidingPendulum:
 
         def _renderBlock(img, pos_block, m_block):
             scale_block = 1
-            m_block_scaled = int(m_block * scale_block)
+            m_block_scaled_half = int(m_block * scale_block / 2)
             cv2.rectangle(
                 img,
-                (pos_block[0] - m_block_scaled, pos_block[1] - m_block_scaled),
-                (pos_block[0] + m_block_scaled, pos_block[1] + m_block_scaled),
+                (pos_block[0] - m_block_scaled_half, pos_block[1] - m_block_scaled_half),
+                (pos_block[0] + m_block_scaled_half, pos_block[1] + m_block_scaled_half),
                 COLOR_BLOCK,
                 -1)
 
@@ -125,7 +131,7 @@ class SlidingPendulum:
             cv2.line(img, posA, posB, COLOR_LINE, 2)
 
         def _renderBall(img, pos, ballId):
-            cv2.circle(img, pos, BALL_RADIUS, COLOR_BALLS[ballId], -1)
+            cv2.circle(img, pos, int(m_scaled[ballId]), COLOR_BALLS[ballId], -1)
 
         def _renderBalls():
             for i in range(len(y_b)):
@@ -137,6 +143,8 @@ class SlidingPendulum:
 
 
         y_b = y[1:]
+        # print('y_b:')
+        # print(y_b)
 
         pos_block = getPos(y[0, 0] * scale, 0)
         pos = y_to_pos(y_b, l_scaled, pos_block)
@@ -145,7 +153,7 @@ class SlidingPendulum:
 
         _renderCenterPoint(img)
         _renderSpring(img, pos_block)
-        _renderBlock(img, pos_block, m_scaled[0])
+        _renderBlock(img, pos_block, m_block_scaled)
         _renderLines()
         _renderBalls()
 
@@ -168,10 +176,13 @@ class SlidingPendulum:
         scale = size / np.sum(l) * 0.3
 
         l_scaled = np.array(l) * scale
-        m_scaled = np.array(m) * 12
+        m_scaled = np.sqrt(np.array(m) / np.pi) * 20
+        m_block_scaled = np.sqrt(m_block) * 20
 
         for i in range(len(t)):
-            frame = SlidingPendulum.render_frame(y[i], l_scaled, m_scaled, canvas, scale)
+            # print('y[t_i]:')
+            # print(y[i])
+            frame = SlidingPendulum.render_frame(y[i], l_scaled, m_scaled,m_block_scaled, canvas, scale)
             video.write(frame.clip(0, 255).astype(np.uint8))
         video.release()
 

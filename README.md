@@ -1,13 +1,19 @@
 # Modelling of natural phenomena - University of Wroclaw
 
-Code to excercices. Nice thing to learn.
+Code to excercices.
 
-## Results:
-
+## Results (mp4):
+- [Simple Pendulum](https://rawgit.com/Platonn/mzp/master/public_results/MathPendulum.mp4)
+- [Spring Pendulum](https://rawgit.com/Platonn/mzp/master/public_results/MathPendulumSpring.mp4)
+- [Double Pendulum On Spring Slider](https://rawgit.com/Platonn/mzp/master/public_results/DoublePendulumOnSpringSlider.mp4)
+- [Double Pendulum On Spring Slider With Different Weights (!)](https://rawgit.com/Platonn/mzp/master/public_results/DoublePendulumOnSpringSliderDifferentWeights.mp4)
+- [Pendulum On Spring Slider](https://rawgit.com/Platonn/mzp/master/public_results/PendulumOnSpringSlider.mp4)
+- [Havier Pendulum On Spring Slider](https://rawgit.com/Platonn/mzp/master/public_results/DoublePendulumOnSpringSlider.mp4)
+- [Triple Pendulum On Spring Slider (!)](https://rawgit.com/Platonn/mzp/master/public_results/TripplePendulumOnSpringSliderDifferentWeights.mp4)
 
 ## Inspirations:
 #### Triple Pendulum Test
 [![](https://img.youtube.com/vi/WMPOvmozGMc/0.jpg)](https://www.youtube.com/watch?v=WMPOvmozGMc)
  
 #### Triple Pendulum on a Cart
-- [![](https://img.youtube.com/vi/cyN-CRNrb3E/0.jpg)](https://www.youtube.com/watch?v=cyN-CRNrb3E)
+[![](https://img.youtube.com/vi/cyN-CRNrb3E/0.jpg)](https://www.youtube.com/watch?v=cyN-CRNrb3E)

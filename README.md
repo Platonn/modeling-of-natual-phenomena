@@ -11,7 +11,7 @@ Code to excercices.
 6. [Havier Pendulum On Spring Slider](https://rawgit.com/Platonn/mzp/master/public_results/DoublePendulumOnSpringSlider.mp4)
 7. **[Triple Pendulum On Spring Slider (!)](https://rawgit.com/Platonn/mzp/master/public_results/TripplePendulumOnSpringSliderDifferentWeights.mp4)**
 
-## Inspirations:
+## Natual inspirations (youtube):
 #### Triple Pendulum Test
 [![](https://img.youtube.com/vi/WMPOvmozGMc/0.jpg)](https://www.youtube.com/watch?v=WMPOvmozGMc)
  
